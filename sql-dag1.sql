@@ -193,3 +193,87 @@ GO
 
 -- Gebruik TABLE VALUED FUNCTION (TVF)
 SELECT * FROM SalesLT.OverviewForNameContainingN(N'road');
+
+-- ------------------------------------------------------------------------------------
+GO
+
+-- CROSS APPLY (en OUTER APPLY)
+CREATE OR ALTER FUNCTION Top3HeavyProductsByCategoryID
+    (@ProductCategoryId AS int)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT TOP (3) WITH TIES
+        * 
+    FROM SalesLT.Product
+    WHERE ProductCategoryID = @ProductCategoryId
+    ORDER BY Weight DESC
+);
+GO
+
+-- We gebruiken APPLY als we een tabel of view willen 'joinen' met een TVF.
+
+-- CROSS APPLY ~ INNER JOIN
+SELECT 
+    * 
+FROM SalesLT.ProductCategory AS pc
+CROSS APPLY Top3HeavyProductsByCategoryID(pc.ProductCategoryID);
+
+-- Voeg een categorie zonder producten toe, deze categorie willen we straks óók ophalen:
+INSERT INTO SalesLT.ProductCategory
+(ParentProductCategoryID, Name)
+VALUES
+(2, 'Snoep');
+
+-- OUTER APPLY ~ LEFT OUTER JOIN
+SELECT 
+    * 
+FROM SalesLT.ProductCategory AS pc
+CROSS APPLY Top3HeavyProductsByCategoryID(pc.ProductCategoryID);
+
+-- -------------------------------------------------------------
+
+-- 3. Derived Table (Subquery achter de FROM)
+SELECT 
+    LEN(dummy.Address) AS LengteAddress
+    , COUNT(*) AS Aantal
+FROM
+(
+    SELECT 
+       c.CompanyName
+       , COALESCE(a.AddressLine1, a.AddressLine2, a.City) AS Address
+    FROM SalesLT.Customer AS c
+    INNER JOIN SalesLT.CustomerAddress AS ca
+    ON c.CustomerID = ca.CustomerID
+    INNER JOIN SalesLT.Address AS a
+    ON ca.AddressID = a.AddressID
+) AS dummy
+GROUP BY LEN(dummy.Address)
+HAVING COUNT(*) >= 25
+ORDER BY Aantal DESC;
+
+-- ------------------------------------------------------------------------
+
+-- 4. Common Table Expression (CTE)
+WITH dummy AS
+(
+    SELECT 
+       c.CompanyName
+       , COALESCE(a.AddressLine1, a.AddressLine2, a.City) AS Address
+    FROM SalesLT.Customer AS c
+    INNER JOIN SalesLT.CustomerAddress AS ca
+    ON c.CustomerID = ca.CustomerID
+    INNER JOIN SalesLT.Address AS a
+    ON ca.AddressID = a.AddressID
+)
+SELECT 
+    LEN(d.Address) AS LengteAddress
+    , COUNT(*) AS Aantal
+FROM dummy AS d
+GROUP BY LEN(d.Address)
+HAVING COUNT(*) >= 25
+ORDER BY Aantal DESC;
+
+-- ------------------------------------------------------------------------
+
