@@ -1,4 +1,4 @@
--- 1. Write a query that shows SalesOrderId, OrderDate, Customer Full Name (existing oif FirstName, MiddleName and LastName) and Order Total
+-- 1. Write a query that shows SalesOrderId, OrderDate, Customer Full Name (existing of FirstName, MiddleName and LastName) and Order Total
       - Use tables: Customer, SalesOrderHeader, SalesOrderDetail
       - Calculate the subtotals for each OrderDetail ("OrderRegel") manually, taking into account: OrderQty, UnitPrice and UnitPriceDiscount
 
