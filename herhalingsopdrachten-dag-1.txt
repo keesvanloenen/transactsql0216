@@ -1,0 +1,27 @@
+-- 1. Write a query that shows SalesOrderId, OrderDate, Customer Full Name (existing oif FirstName, MiddleName and LastName) and Order Total
+      - Use tables: Customer, SalesOrderHeader, SalesOrderDetail
+      - Calculate the subtotals for each OrderDetail ("OrderRegel") manually, taking into account: OrderQty, UnitPrice and UnitPriceDiscount
+
+-- 2. Which customers have got at least one order. Optimize next query:
+
+SELECT DISTINCT c.LastName
+FROM SalesLT.Customer c
+INNER JOIN SalesLT.SalesOrderHeader o 
+ON c.CustomerID = o.CustomerId;
+
+-- 3. Next query returns the product with the most recent productid and its category.
+-- Add one line to the query so that PER CATEGORY the product with the most recent productid is returned.
+
+SELECT 
+    pc.Name			AS Categorie,
+    p.Name			AS Product,
+    p.ProductID		AS ProductID
+FROM SalesLT.ProductCategory AS pc
+INNER JOIN SalesLT.Product AS p
+ON pc.ProductCategoryID = p.ProductCategoryID
+WHERE p.ProductID = 
+(
+	SELECT MAX(ProductID)
+	FROM SalesLT.Product
+);
+
